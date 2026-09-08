@@ -6,9 +6,9 @@ Pos = Tuple[int, int]
 
 def manhattan(a: Pos, b: Pos) -> float:
     """Implemente a distância Manhattan entre duas posições."""
-    raise NotImplementedError("Implemente manhattan().")
+    return float(abs(a[0] - b[0]) + abs(a[1] - b[1]))
 
 
 def euclidean(a: Pos, b: Pos) -> float:
     """Implemente a distância Euclidiana entre duas posições."""
-    raise NotImplementedError("Implemente euclidean().")
+    return math.sqrt((a[0] - b[0])**2 + (a[1] - b[1])**2)

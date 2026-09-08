@@ -16,10 +16,10 @@ Leia primeiro o arquivo **`EC_IA_Trabalho_01_2026.pdf`**. O enunciado prevalece 
 
 Preencha estes dados antes de cada submissão:
 
-- **Aluno(a) 1:** `<nome>`
-- **Aluno(a) 2:** `<nome ou não se aplica>`
-- **Repositório Git:** `<link do repositório>`
-- **Tag:** `entrega-parte1` ou `entrega-final`
+- **Aluno(a) 1:** `Arthur Batista Lage e Silva`
+- **Aluno(a) 2:** `Rafael Ferreira da Rocha`
+- **Repositório Git:** `https://github.com/arthur-lage/trabalho_ia1`
+- **Tag:** `entrega-parte1`
 
 
 
