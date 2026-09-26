@@ -4,7 +4,8 @@ Preencha esta seção para toda ferramenta de IA generativa utilizada durante o 
 
 | Ferramenta | Finalidade | Arquivos/partes afetadas | Como o resultado foi verificado |
 |---|---|---|---|
-| Ex.: ChatGPT | Revisão textual do relatório | Seção 4 | Revisão manual pelos autores |
+| Gemini | Explicar erros da implementação dos algoritmos | src/search.py | Revisão manual pelos autores, com testes manuais e correção de erros |
+| Gemini | Explicar erros da implementação dos casos de testes | tests/test_search.py | Revisão manual pelos autores, com testes manuais e correção de erros |
 
 ## Declaração
 
