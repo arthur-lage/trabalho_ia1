@@ -112,13 +112,13 @@ def dfs(problem: WeightedGrid) -> SearchResult:
         currentPos = stack.pop()
 
         if problem.goal_test(currentPos):
+            # found goal
             found = True
             break
 
         expanded += 1
 
-        # Para que a ordem efetiva de expansão seja N -> L -> S -> O,
-        # empilhamos os sucessores na ordem reversa.
+        # reverses order so stack pops n, l, s, o first
         for action, nxt, step_cost in reversed(list(problem.successors(currentPos))):
             if nxt not in visited:
                 visited.add(nxt)
@@ -174,7 +174,7 @@ def uniform_cost(problem: WeightedGrid) -> SearchResult:
     goal = problem.goal
 
     counter = 0
-    # heap armazena: (g(n), ordem_insercao, pos)
+    # priority queue stores g, order, pos
     heap: list[tuple[int, int, Pos]] = [(0, counter, start)]
     cost_so_far: dict[Pos, int] = {start: 0}
     came_from: dict[Pos, tuple[Pos | None, str | None, int]] = {}
@@ -195,13 +195,14 @@ def uniform_cost(problem: WeightedGrid) -> SearchResult:
         if frontier_counts[currentPos] == 0:
             del frontier_counts[currentPos]
 
-        # Entradas obsoletas da fila de prioridade devem ser ignoradas
+        # skips obsolete entries
         if currentPos in explored:
             continue
         if g > cost_so_far[currentPos]:
             continue
 
         if problem.goal_test(currentPos):
+            # found goal
             found = True
             break
 
@@ -271,7 +272,7 @@ def greedy(problem: WeightedGrid, heuristic: Heuristic) -> SearchResult:
 
     counter = 0
     h_start = heuristic(start, goal)
-    # heap armazena: (h(n), ordem_insercao, pos)
+    # priority queue stores h, order, pos
     heap: list[tuple[float, int, Pos]] = [(h_start, counter, start)]
     came_from: dict[Pos, tuple[Pos | None, str | None, int]] = {}
     came_from[start] = (None, None, 0)
@@ -292,6 +293,7 @@ def greedy(problem: WeightedGrid, heuristic: Heuristic) -> SearchResult:
             del frontier_counts[currentPos]
 
         if problem.goal_test(currentPos):
+            # found goal
             found = True
             break
 
@@ -356,7 +358,7 @@ def astar(problem: WeightedGrid, heuristic: Heuristic) -> SearchResult:
 
     counter = 0
     h_start = heuristic(start, goal)
-    # heap armazena: (f(n), h(n), ordem_insercao, pos)
+    # priority queue stores f, h, order, pos
     heap: list[tuple[float, float, int, Pos]] = [(h_start, h_start, counter, start)]
     cost_so_far: dict[Pos, int] = {start: 0}
     came_from: dict[Pos, tuple[Pos | None, str | None, int]] = {}
@@ -377,7 +379,7 @@ def astar(problem: WeightedGrid, heuristic: Heuristic) -> SearchResult:
         if frontier_counts[currentPos] == 0:
             del frontier_counts[currentPos]
 
-        # Entradas obsoletas da fila de prioridade devem ser ignoradas
+        # skips obsolete entries
         if currentPos in explored:
             continue
         g = f - h
@@ -385,6 +387,7 @@ def astar(problem: WeightedGrid, heuristic: Heuristic) -> SearchResult:
             continue
 
         if problem.goal_test(currentPos):
+            # found goal
             found = True
             break
 

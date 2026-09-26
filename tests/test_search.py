@@ -6,17 +6,9 @@ from src.search import astar, bfs, dfs, greedy, uniform_cost
 
 
 class SearchRequirementsTests(unittest.TestCase):
-    """
-    Testes mínimos obrigatórios especificados na Seção 2.8 do enunciado:
-    1. Início adjacente ao objetivo;
-    2. Mapa sem solução;
-    3. Mapa com ciclos;
-    4. Existência de rotas distintas com o mesmo número de ações;
-    5. Existência de uma rota curta e cara e outra mais longa e barata.
-    """
 
     def test_start_adjacent_to_goal(self):
-        """1. Caso de teste: Início adjacente ao objetivo (distância de 1 passo)."""
+        # tests when start is next to goal
         grid = WeightedGrid(
             [
                 list("SG"),
@@ -37,7 +29,7 @@ class SearchRequirementsTests(unittest.TestCase):
         self.assertEqual(res_ucs.cost, 1)
 
     def test_unsolvable_map(self):
-        """2. Caso de teste: Mapa sem solução (objetivo isolado por obstáculos)."""
+        # tests map with no possible path
         grid = WeightedGrid(
             [
                 list("S#G"),
@@ -61,8 +53,7 @@ class SearchRequirementsTests(unittest.TestCase):
                 self.assertEqual(res.cost, float("inf"))
 
     def test_map_with_cycles(self):
-        """3. Caso de teste: Mapa com ciclos (anel com repetição potencial de estados)."""
-        # Formato de anel 3x3 com obstáculo no centro
+        # tests map with cycle to check for loops
         grid = WeightedGrid(
             [
                 list("S.."),
@@ -71,7 +62,6 @@ class SearchRequirementsTests(unittest.TestCase):
             ]
         )
 
-        # Garante que nenhum algoritmo entra em loop infinito e todos encontram o caminho
         for res in [
             bfs(grid),
             dfs(grid),
@@ -86,10 +76,7 @@ class SearchRequirementsTests(unittest.TestCase):
                 self.assertEqual(res.path[-1], grid.goal)
 
     def test_distinct_routes_same_step_count(self):
-        """
-        4. Caso de teste: Existência de rotas distintas com o mesmo número de ações.
-        Verifica se a ordem obrigatória de desempate (N -> L -> S -> O) é respeitada.
-        """
+        # checks tie breaking order n, l, s, o
         grid = WeightedGrid(
             [
                 list("S.."),
@@ -98,42 +85,36 @@ class SearchRequirementsTests(unittest.TestCase):
             ]
         )
 
-        # Rota 1 (por cima): L, L, S, S (4 passos)
-        # Rota 2 (por baixo): S, S, L, L (4 passos)
-        # Ambas possuem 4 ações e custo 4.
-        # Pela ordem lógica N -> L -> S -> O, o sucessor L é explorado antes de S.
+        # top path is l, l, s, s and bottom is s, s, l, l
         res_bfs = bfs(grid)
         self.assertTrue(res_bfs.found)
         self.assertEqual(res_bfs.steps, 4)
         self.assertEqual(res_bfs.actions, ["L", "L", "S", "S"])
 
     def test_short_expensive_vs_long_cheap_route(self):
-        """
-        5. Caso de teste: Existência de rota curta e cara vs rota mais longa e barata.
-        Demonstra a diferença fundamental de optimalidade entre BFS e UCS/A*.
-        """
+        # compares shortest path vs cheapest path
         grid = WeightedGrid(
             [
-                list("SMMG"),  # Rota curta: 3 passos, custo: 6 + 6 + 1 = 13
-                list("...."),  # Rota longa: 5 passos (S, L, L, L, N), custo: 1 + 1 + 1 + 1 + 1 = 5
+                list("SMMG"),
+                list("...."),
             ]
         )
 
-        # BFS minimiza número de ações (profundidade): escolhe a rota de 3 passos, mais cara
+        # bfs chooses shorter path with 3 steps
         res_bfs = bfs(grid)
         self.assertTrue(res_bfs.found)
         self.assertEqual(res_bfs.steps, 3)
         self.assertEqual(res_bfs.cost, 13)
         self.assertEqual(res_bfs.actions, ["L", "L", "L"])
 
-        # UCS minimiza o custo do caminho: prefere a rota de 5 passos, mais barata
+        # ucs chooses cheaper path with 5 steps
         res_ucs = uniform_cost(grid)
         self.assertTrue(res_ucs.found)
         self.assertEqual(res_ucs.steps, 5)
         self.assertEqual(res_ucs.cost, 5)
         self.assertEqual(res_ucs.actions, ["S", "L", "L", "L", "N"])
 
-        # A* com Manhattan também encontra a rota de custo ótimo (5)
+        # astar also finds the cheaper path
         res_astar = astar(grid, manhattan)
         self.assertTrue(res_astar.found)
         self.assertEqual(res_astar.steps, 5)
@@ -143,4 +124,3 @@ class SearchRequirementsTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
