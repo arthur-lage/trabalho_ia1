@@ -358,8 +358,10 @@ def astar(problem: WeightedGrid, heuristic: Heuristic) -> SearchResult:
 
     counter = 0
     h_start = heuristic(start, goal)
-    # priority queue stores f, h, order, pos
-    heap: list[tuple[float, float, int, Pos]] = [(h_start, h_start, counter, start)]
+    # O g é carga útil após o contador, que define a ordem de desempate.
+    heap: list[tuple[float, float, int, Pos, int]] = [
+        (h_start, h_start, counter, start, 0)
+    ]
     cost_so_far: dict[Pos, int] = {start: 0}
     came_from: dict[Pos, tuple[Pos | None, str | None, int]] = {}
     came_from[start] = (None, None, 0)
@@ -374,7 +376,7 @@ def astar(problem: WeightedGrid, heuristic: Heuristic) -> SearchResult:
     peak_stored_states = 1
 
     while len(heap) > 0:
-        f, h, _, currentPos = heapq.heappop(heap)
+        f, h, _, currentPos, g = heapq.heappop(heap)
         frontier_counts[currentPos] -= 1
         if frontier_counts[currentPos] == 0:
             del frontier_counts[currentPos]
@@ -382,7 +384,6 @@ def astar(problem: WeightedGrid, heuristic: Heuristic) -> SearchResult:
         # skips obsolete entries
         if currentPos in explored:
             continue
-        g = f - h
         if g > cost_so_far[currentPos]:
             continue
 
@@ -402,7 +403,7 @@ def astar(problem: WeightedGrid, heuristic: Heuristic) -> SearchResult:
                 counter += 1
                 h_nxt = heuristic(nxt, goal)
                 f_nxt = new_cost + h_nxt
-                heapq.heappush(heap, (f_nxt, h_nxt, counter, nxt))
+                heapq.heappush(heap, (f_nxt, h_nxt, counter, nxt, new_cost))
                 generated += 1
                 frontier_counts[nxt] = frontier_counts.get(nxt, 0) + 1
                 if nxt in explored:
