@@ -79,7 +79,9 @@ O histórico de commits poderá ser utilizado como elemento auxiliar na verifica
 │   └── run_experiments.py
 ├── tests/
 │   ├── test_problem.py
-│   └── test_search.py
+│   ├── test_search.py
+│   ├── test_eight_queens.py
+│   └── test_hill_climbing.py
 ├── results/
 │   ├── tabela_parte1.md
 │   ├── tabela_parte1.csv
@@ -110,7 +112,7 @@ Exemplo de execução após a implementação:
 python -m src.main busca --map data/mapa_teste.txt --algorithm astar --heuristic manhattan
 ```
 
-## Parte 2 - Busca local (etapa posterior)
+## Parte 2 - Busca local
 
 Devem ser implementados para o problema das 8 Rainhas:
 
@@ -134,7 +136,7 @@ Execute todos os testes com:
 python -m unittest discover -s tests -v
 ```
 
-Os testes cobrem casos de solução e falha, ciclos, desempate, custos ponderados, heurísticas, mapas não quadrados e comparação de A* com UCS em 200 mapas aleatórios reproduzíveis.
+Os testes de Parte 1 cobrem casos de solução e falha, ciclos, desempate, custos ponderados, heurísticas, mapas não quadrados e comparação de A* com UCS em 200 mapas aleatórios reproduzíveis. Os testes de 8 Rainhas definem os casos de aceitação da Parte 2 e só passarão depois da implementação de `conflicts`, `moves`, Hill Climbing e Random-Restart.
 
 ## Experimentos
 
@@ -145,6 +147,14 @@ python -m scripts.run_experiments
 ```
 
 O script executa cada configuração 30 vezes por padrão e calcula a mediana do tempo, sem incluir a leitura do mapa. Para usar outro mapa, informe `--map caminho/do/mapa.txt`; para aumentar as repetições, informe `--repeticoes N` (mínimo 30). Os resultados são gravados em `results/`.
+
+Depois da implementação da Parte 2, rode os experimentos com as sementes de 0 a 99:
+
+```bash
+python -m scripts.run_experiments --parte 2
+```
+
+Esse modo resume taxa de sucesso, iterações e estados avaliados, além dos reinícios do Random-Restart. Também grava os resultados por semente em `results/experimentos_rainhas.csv`, a tabela agregada em `results/tabela_parte2.md` e os dados de uma falha do Hill Climbing em `results/falha_hill_climbing.md`. Use `--parte ambas` para executar as duas partes.
 
 ### Resultados preliminares no mapa público
 

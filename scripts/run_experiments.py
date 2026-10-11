@@ -1,13 +1,17 @@
-"""Executa e registra os experimentos da Parte 1 em uma grade ponderada."""
+"""Executa e registra os experimentos das Partes 1 e 2 do trabalho."""
 
 import argparse
 import csv
+import json
 import statistics
 import time
 from pathlib import Path
+from random import Random
 from typing import Callable
 
+from src.eight_queens import initial_board, render
 from src.heuristics import euclidean, manhattan
+from src.hill_climbing import hill_climbing, random_restart
 from src.models import SearchResult
 from src.problem import WeightedGrid
 from src.search import astar, bfs, dfs, greedy, uniform_cost
@@ -121,6 +125,87 @@ def _write_path_text(problem: WeightedGrid, rows: list[dict[str, str | int]]) ->
     (RESULTS / "caminhos.txt").write_text("\n\n".join(blocks) + "\n", encoding="utf-8")
 
 
+def _run_queens_experiments() -> None:
+    """Agrega os experimentos da Parte 2 sem alterar os algoritmos de busca local."""
+    raw_rows: list[dict[str, object]] = []
+    hill_failure = None
+
+    for seed in range(100):
+        hill_rng = Random(seed)
+        hill_initial = initial_board(hill_rng)
+        hill_result = hill_climbing(hill_initial)
+
+        restart_result = random_restart(Random(seed), max_restarts=50)
+        for name, result in (
+            ("Hill Climbing", hill_result),
+            ("Random-Restart Hill Climbing", restart_result),
+        ):
+            raw_rows.append(
+                {
+                    "Algoritmo": name,
+                    "Semente": seed,
+                    "Sucesso": result.success,
+                    "Iteracoes": result.iterations,
+                    "Estados avaliados": result.evaluated_states,
+                    "Reinicios": result.restarts,
+                    "Conflitos iniciais": result.initial_conflicts,
+                    "Conflitos finais": result.final_conflicts,
+                    "Estado inicial": json.dumps(result.initial),
+                    "Estado final": json.dumps(result.final),
+                }
+            )
+
+        if not hill_result.success and hill_failure is None:
+            hill_failure = hill_result
+            hill_failure_seed = seed
+
+    raw_fields = list(raw_rows[0])
+    with (RESULTS / "experimentos_rainhas.csv").open(
+        "w", encoding="utf-8-sig", newline=""
+    ) as stream:
+        writer = csv.DictWriter(stream, fieldnames=raw_fields)
+        writer.writeheader()
+        writer.writerows(raw_rows)
+
+    summary = [
+        "| Método | Sucesso | Média iterações | Mediana iterações | Média estados avaliados | Média reinícios | Máximo reinícios |",
+        "| --- | ---: | ---: | ---: | ---: | ---: | ---: |",
+    ]
+    for name in ("Hill Climbing", "Random-Restart Hill Climbing"):
+        method_rows = [row for row in raw_rows if row["Algoritmo"] == name]
+        successes = sum(bool(row["Sucesso"]) for row in method_rows)
+        iterations = [int(row["Iteracoes"]) for row in method_rows]
+        evaluations = [int(row["Estados avaliados"]) for row in method_rows]
+        restart_counts = [int(row["Reinicios"]) for row in method_rows]
+        restarts_mean = f"{statistics.mean(restart_counts):.2f}" if name.startswith("Random") else "—"
+        restarts_max = str(max(restart_counts)) if name.startswith("Random") else "—"
+        summary.append(
+            f"| {name} | {successes}% | {statistics.mean(iterations):.2f} | "
+            f"{statistics.median(iterations):.2f} | {statistics.mean(evaluations):.2f} | "
+            f"{restarts_mean} | {restarts_max} |"
+        )
+    (RESULTS / "tabela_parte2.md").write_text("\n".join(summary) + "\n", encoding="utf-8")
+    print("\n".join(summary))
+
+    if hill_failure is None:
+        failure_text = (
+            "Nenhuma falha do Hill Climbing ocorreu nas sementes 0..99; "
+            "é necessário selecionar outro conjunto de execuções para cumprir "
+            "a análise de falha solicitada no relatório.\n"
+        )
+    else:
+        failure_text = (
+            f"Falha do Hill Climbing na semente {hill_failure_seed}.\n\n"
+            f"Estado inicial: {json.dumps(hill_failure.initial)}\n"
+            f"Conflitos iniciais: {hill_failure.initial_conflicts}\n\n"
+            f"Estado final: {json.dumps(hill_failure.final)}\n"
+            f"Conflitos finais: {hill_failure.final_conflicts}\n\n"
+            f"Tabuleiro inicial:\n{render(hill_failure.initial)}\n\n"
+            f"Tabuleiro final:\n{render(hill_failure.final)}\n"
+        )
+    (RESULTS / "falha_hill_climbing.md").write_text(failure_text, encoding="utf-8")
+
+
 def _positive_repetitions(value: str) -> int:
     repetitions = int(value)
     if repetitions < 30:
@@ -129,19 +214,22 @@ def _positive_repetitions(value: str) -> int:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Experimentos reproduzíveis da Parte 1.")
+    parser = argparse.ArgumentParser(description="Experimentos reproduzíveis do Trabalho 01.")
+    parser.add_argument("--parte", choices=("1", "2", "ambas"), default="1")
     parser.add_argument("--map", type=Path, default=MAPA_PADRAO, help="Arquivo de mapa.")
     parser.add_argument("--repeticoes", type=_positive_repetitions, default=REPETICOES)
     args = parser.parse_args()
 
-    # O mapa é lido uma vez; somente as chamadas dos algoritmos são cronometradas.
-    problem = WeightedGrid.from_file(args.map)
     RESULTS.mkdir(parents=True, exist_ok=True)
-    rows = _experiment(problem, args.repeticoes)
-    _write_tables(rows)
-    _write_path_text(problem, rows)
+    if args.parte in {"1", "ambas"}:
+        # O mapa é lido uma vez; só as buscas são cronometradas.
+        problem = WeightedGrid.from_file(args.map)
+        rows = _experiment(problem, args.repeticoes)
+        _write_tables(rows)
+        _write_path_text(problem, rows)
+    if args.parte in {"2", "ambas"}:
+        _run_queens_experiments()
     print(f"\nArquivos gerados em: {RESULTS}")
-    print("Parte 2: TODO - experimentos de oito rainhas ficam para a proxima etapa.")
 
 
 if __name__ == "__main__":

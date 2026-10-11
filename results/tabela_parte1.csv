@@ -1,8 +1,8 @@
 ﻿Alg.,Heur.,Passos,Custo,Ger.,Exp.,Pico F.,Pico Mem.,Tempo mediano (ms)
-BFS,-,15,40,66,59,9,66,0.083
+BFS,-,15,40,66,59,9,66,0.082
 DFS,-,15,40,21,15,6,21,0.025
 UCS,-,29,29,77,74,6,77,0.187
-Gulosa,Manhattan,15,40,21,15,6,21,0.029
+Gulosa,Manhattan,15,40,21,15,6,21,0.028
 A*,Manhattan,29,29,60,43,17,58,0.137
-Gulosa,Euclidiana,15,40,21,15,6,21,0.030
-A*,Euclidiana,29,29,72,60,12,72,0.184
+Gulosa,Euclidiana,15,40,21,15,6,21,0.028
+A*,Euclidiana,29,29,72,60,12,72,0.182
