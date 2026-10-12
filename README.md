@@ -19,7 +19,7 @@ Preencha estes dados antes de cada submissão:
 - **Aluno(a) 1:** `Arthur Batista Lage e Silva`
 - **Aluno(a) 2:** `Rafael Ferreira da Rocha`
 - **Repositório Git:** `https://github.com/arthur-lage/trabalho_ia1`
-- **Tag:** `entrega-parte1`
+- **Tag:** `entrega-final`
 
 ## Entrega no SIGAA e repositório Git
 
